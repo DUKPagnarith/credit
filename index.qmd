@@ -85,22 +85,7 @@ Things your DS instincts won't prepare you for:
 
 > **The rule:** If a feature boosts AUC but you can't explain *why* it predicts default → **drop it**.
 
----
 
-## Point-in-Time vs. Through-the-Cycle
-
-Two philosophies for measuring risk — picking the wrong one breaks trust:
-
-| | Point-in-Time (PIT) | Through-the-Cycle (TTC) |
-|--|---------------------|------------------------|
-| **Reacts to** | Current conditions | Long-term averages |
-| **Changes** | Quickly | Slowly |
-| **Used for** | Loan approvals, pricing | Regulatory capital |
-| **Analogy** | Today's weather | Average climate |
-
-- **PIT** = sensitive, responsive, volatile
-- **TTC** = stable, conservative, slow to react
-- Many models blend both approaches depending on the use case
 
 ---
 
