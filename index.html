@@ -129,7 +129,7 @@
 
 <section id="title-slide" data-background-color="#1a2744" class="quarto-title-block center">
   <h1 class="title">Credit Risk Modeling</h1>
-  <p class="subtitle">By Duk Pagnarith</p>
+  <p class="subtitle">A Fast Introduction for Data Scientists — By Duk Pagnarith</p>
 
 <div class="quarto-title-authors">
 </div>
@@ -137,194 +137,118 @@
 </section>
 <section id="what-is-credit-risk" class="slide level2">
 <h2>What is Credit Risk?</h2>
-<p><strong>The simple version:</strong> Banks lend money. Sometimes people don’t pay it back. That’s credit risk.</p>
+<p>Banks lend money. Sometimes people don’t pay it back. <strong>That’s credit risk.</strong></p>
 <ul>
-<li>Banks make money from <strong>interest and fees</strong></li>
-<li>They lose money when borrowers <strong>fail to repay</strong></li>
 <li>Credit risk modeling = <strong>predicting who won’t pay back and how much the bank could lose</strong></li>
+<li>It’s classification + regression — but wrapped in <strong>heavy regulations</strong></li>
 </ul>
-<blockquote>
-<p>Think of it like a classification + regression problem — but with heavy rules and regulations on top.</p>
-</blockquote>
-</section>
-<section id="the-three-things-we-predict" class="slide level2">
-<h2>The Three Things We Predict</h2>
-<p>Credit risk breaks down into <strong>three prediction tasks</strong>:</p>
+<p>We predict <strong>three things</strong>:</p>
 <table class="caption-top">
-<colgroup>
-<col style="width: 28%">
-<col style="width: 41%">
-<col style="width: 30%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Component</th>
-<th>What We Predict</th>
-<th>ML Analogy</th>
+<th>Prediction</th>
+<th>You’d Call It…</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>PD</strong> (Probability of Default)</td>
-<td>Will this person stop paying?</td>
-<td>Binary classification (0/1)</td>
+<td><strong>PD</strong></td>
+<td>Will they default?</td>
+<td>Binary classification</td>
 </tr>
 <tr class="even">
-<td><strong>LGD</strong> (Loss Given Default)</td>
-<td>If they stop paying, how much do we lose?</td>
-<td>Regression (0 to 1 ratio)</td>
+<td><strong>LGD</strong></td>
+<td>How much do we lose?</td>
+<td>Regression (0–1)</td>
 </tr>
 <tr class="odd">
-<td><strong>EAD</strong> (Exposure at Default)</td>
-<td>How much money is on the line?</td>
-<td>Regression (dollar amount)</td>
+<td><strong>EAD</strong></td>
+<td>How much is at risk?</td>
+<td>Regression ($)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Expected Loss = PD × LGD × EAD</strong></p>
 </section>
-<section id="how-a-loan-goes-bad" class="slide level2 scrollable">
-<h2>How a Loan Goes Bad</h2>
-<p>There’s a timeline when someone stops paying:</p>
+<section id="how-defaults-work-target-variables" class="slide level2 scrollable">
+<h2>How Defaults Work &amp; Target Variables</h2>
+<p><strong>The default timeline:</strong></p>
 <ol type="1">
-<li><strong>Delinquency</strong> — Missed a payment. Can still recover.</li>
-<li><strong>Default</strong> — 90–180 days without payment. Officially “bad.”</li>
-<li><strong>Loss</strong> — Bank writes off the debt or takes the collateral.</li>
+<li><strong>Delinquency</strong> → missed payments (can recover)</li>
+<li><strong>Default</strong> → 90–180 days unpaid (officially “bad”)</li>
+<li><strong>Loss</strong> → debt written off or collateral seized</li>
 </ol>
-<p>This timeline is what <strong>generates the labels</strong> (target variables) for our models.</p>
+<p><strong>Building your labels:</strong></p>
+<ul>
+<li><strong>PD target:</strong> Snapshot each borrower → did they default within 12 months? Stack multiple years for economic diversity.</li>
+<li><strong>LGD target:</strong> (Balance − recovered + costs) ÷ balance at default. Requires years of recovery data.</li>
+<li><strong>EAD target:</strong> Outstanding balance + fees + accrued interest at default.</li>
+</ul>
+<blockquote>
+<p>Different products (mortgage vs.&nbsp;credit card) and client types (retail vs.&nbsp;wholesale) need <strong>separate models</strong> — the risk drivers are completely different.</p>
+</blockquote>
 </section>
-<section id="different-products-different-risk" class="slide level2">
-<h2>Different Products = Different Risk</h2>
-<p>Not all loans are the same:</p>
+<section id="what-makes-credit-risk-different-from-regular-ml" class="slide level2">
+<h2>What Makes Credit Risk Different from Regular ML</h2>
+<p>Things your DS instincts won’t prepare you for:</p>
+<ul>
+<li><strong>Regulations shape everything:</strong> Basel Accords (capital), IFRS 9 (forward-looking losses), Stress Testing</li>
+<li><strong>Explainability &gt; accuracy:</strong> Regulators can reject a model they can’t understand</li>
+<li><strong>Feature restrictions:</strong> No social media, browsing history, or “creative” data. Every feature needs a <strong>business reason</strong></li>
+<li><strong>Conservatism is required:</strong> PD floors, downturn weighting, margins of conservatism — models intentionally overestimate risk</li>
+<li><strong>Documentation is mandatory:</strong> Every decision must be written down and justified for auditors</li>
+</ul>
+<blockquote>
+<p>You can’t just build the best model — it also has to <strong>follow the rules</strong>.</p>
+</blockquote>
+</section>
+<section id="data-feature-engineering" class="slide level2">
+<h2>Data &amp; Feature Engineering</h2>
+<p><strong>What you CAN use:</strong></p>
+<ul>
+<li>Payment history, balances, transaction patterns</li>
+<li>Credit bureau scores, income, debt ratios</li>
+<li>Economic indicators (GDP, unemployment, interest rates)</li>
+</ul>
+<p><strong>Key features in credit risk:</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Product</th>
-<th>Loan Size</th>
-<th>Duration</th>
-<th>Backed By</th>
+<th>Category</th>
+<th>Examples</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Mortgage</td>
-<td>Big</td>
-<td>Years</td>
-<td>The house</td>
+<td><strong>Payment behavior</strong></td>
+<td>Missed payments, payment amounts</td>
 </tr>
 <tr class="even">
-<td>Credit Card</td>
-<td>Small</td>
-<td>Monthly</td>
-<td>Nothing</td>
+<td><strong>Delinquency</strong></td>
+<td>Frequency, severity, recency</td>
+</tr>
+<tr class="odd">
+<td><strong>Financial health</strong></td>
+<td>Income, debt-to-income ratio</td>
+</tr>
+<tr class="even">
+<td><strong>Collateral</strong></td>
+<td>Asset value securing the loan</td>
+</tr>
+<tr class="odd">
+<td><strong>Macro</strong></td>
+<td>Unemployment rate, GDP growth</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Why this matters:</strong> You build <strong>separate models</strong> for different products because the risk drivers are completely different.</p>
-</section>
-<section id="retail-vs.-wholesale-clients" class="slide level2">
-<h2>Retail vs.&nbsp;Wholesale Clients</h2>
-<ul>
-<li><strong>Retail</strong> = Regular people, small businesses</li>
-<li><strong>Wholesale</strong> = Big corporations, governments</li>
-</ul>
-<p>Banks build <strong>different models</strong> for each because:</p>
-<ul>
-<li>Retail: lots of data, lots of defaults to learn from</li>
-<li>Wholesale: less data, defaults are rare → harder to model</li>
-</ul>
-</section>
-<section id="expected-vs.-unexpected-losses" class="slide level2">
-<h2>Expected vs.&nbsp;Unexpected Losses</h2>
-<p><strong>Expected Losses (EL)</strong></p>
-<ul>
-<li>Normal losses the bank plans for — like a “cost of doing business”</li>
-<li>Banks set aside money (<strong>provisions</strong>) to cover these</li>
-<li>Your model needs to be <strong>accurate</strong></li>
-</ul>
-<p><strong>Unexpected Losses (UL)</strong></p>
-<ul>
-<li>Extreme losses during crashes or recessions</li>
-<li>Banks hold <strong>capital reserves</strong> for these</li>
-<li>Your model needs to be <strong>conservative</strong> (better to overestimate risk)</li>
-</ul>
-</section>
-<section id="why-regulations-matter" class="slide level2">
-<h2>Why Regulations Matter</h2>
-<p>Unlike most ML projects, credit risk models have <strong>strict rules</strong>:</p>
-<ul>
-<li><strong>Basel Accords</strong> — How much money banks must hold as a safety net</li>
-<li><strong>IFRS 9</strong> — Banks must predict <em>future</em> losses, not just look at past ones</li>
-<li><strong>Stress Testing</strong> — “What if there’s a recession?” Banks must show they can survive</li>
-</ul>
 <blockquote>
-<p>You can’t just build the best model — it also has to follow the rules.</p>
+<p><strong>The rule:</strong> If a feature boosts AUC but you can’t explain <em>why</em> it predicts default → <strong>drop it</strong>.</p>
 </blockquote>
-</section>
-<section id="the-model-lifecycle" class="slide level2 scrollable">
-<h2>The Model Lifecycle</h2>
-<p>A credit risk project takes <strong>3 months to 1 year</strong> and follows these stages:</p>
-<ol type="1">
-<li><strong>Requirements</strong> — What does the business need?</li>
-<li><strong>Data Work</strong> — Extract, clean, prepare (~70% of the time)</li>
-<li><strong>Modeling</strong> — Build and evaluate models</li>
-<li><strong>Documentation</strong> — Write everything down (seriously, everything)</li>
-<li><strong>Validation</strong> — Independent team challenges your work</li>
-<li><strong>Deployment &amp; Monitoring</strong> — Ship it and watch it</li>
-</ol>
-</section>
-<section id="data-what-you-can-and-cant-use" class="slide level2">
-<h2>Data: What You Can and Can’t Use</h2>
-<p><strong>You CAN use:</strong></p>
-<ul>
-<li>Payment history, account balances, transaction data</li>
-<li>Credit bureau scores</li>
-<li>Income, debt levels</li>
-<li>Economic indicators (GDP, unemployment)</li>
-</ul>
-<p><strong>You CANNOT use:</strong></p>
-<ul>
-<li>Social media activity</li>
-<li>Browsing history</li>
-<li>Any “creative” data source</li>
-</ul>
-<blockquote>
-<p>The model must be <strong>explainable and fair</strong>. You can’t deny someone a loan because of a tweet.</p>
-</blockquote>
-</section>
-<section id="building-the-target-variable" class="slide level2">
-<h2>Building the Target Variable</h2>
-<p><strong>For PD (Classification):</strong></p>
-<ul>
-<li>Look at each borrower today → did they default in the next 12 months?</li>
-<li>Label: 0 = no default, 1 = default</li>
-<li>Stack multiple years of snapshots to capture different economic periods</li>
-</ul>
-<p><strong>For LGD (Regression):</strong></p>
-<ul>
-<li>(Balance at default − recovered money + costs) ÷ balance at default</li>
-<li>Need to wait for recoveries to come in (can take years)</li>
-</ul>
-<p><strong>For EAD (Regression):</strong></p>
-<ul>
-<li>Outstanding balance at default + fees + interest owed</li>
-</ul>
-</section>
-<section id="feature-engineering" class="slide level2">
-<h2>Feature Engineering</h2>
-<p>Common features in credit risk:</p>
-<ul>
-<li><strong>Payment behavior</strong> — missed payments, payment amounts</li>
-<li><strong>Delinquency history</strong> — how often, how severe</li>
-<li><strong>Financial health</strong> — income, debt-to-income ratio</li>
-<li><strong>Collateral value</strong> — what secures the loan</li>
-<li><strong>Macro indicators</strong> — unemployment rate, interest rates</li>
-</ul>
-<p><strong>Key rule:</strong> Every feature must <strong>make business sense</strong>. No random transformations just because they boost AUC.</p>
 </section>
 <section id="point-in-time-vs.-through-the-cycle" class="slide level2">
 <h2>Point-in-Time vs.&nbsp;Through-the-Cycle</h2>
-<p>Two ways to think about risk:</p>
+<p>Two philosophies for measuring risk — picking the wrong one breaks trust:</p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -356,41 +280,35 @@
 </tr>
 </tbody>
 </table>
-<p>Picking the wrong one = building a model your users don’t trust.</p>
+<ul>
+<li><strong>PIT</strong> = sensitive, responsive, volatile</li>
+<li><strong>TTC</strong> = stable, conservative, slow to react</li>
+<li>Many models blend both approaches depending on the use case</li>
+</ul>
 </section>
 <section id="modeling-approaches" class="slide level2">
 <h2>Modeling Approaches</h2>
-<p><strong>The go-to models:</strong></p>
+<p><strong>The workhorses (regulators love these):</strong></p>
 <ul>
-<li><strong>Logistic Regression</strong> — PD (binary). Transparent, regulators love it.</li>
-<li><strong>Linear Regression</strong> — LGD/EAD (continuous). Simple, explainable.</li>
-<li><strong>Scorecards</strong> — Binned features with point-based weights. Very common in retail.</li>
+<li><strong>Logistic Regression</strong> → PD. Transparent, standard, trusted.</li>
+<li><strong>Scorecards</strong> → Binned features + point weights. Dominant in retail lending.</li>
+<li><strong>Linear Regression</strong> → LGD/EAD. Simple and explainable.</li>
 </ul>
-<p><strong>Advanced options (often used as challengers):</strong></p>
+<p><strong>Challenger models (you’ll be asked to build these too):</strong></p>
 <ul>
-<li>Decision Trees, Random Forest, Gradient Boosting</li>
-<li>Survival models (time-to-default)</li>
-<li>Bayesian methods (when data is limited)</li>
+<li>Gradient Boosting, Random Forest — great benchmarks</li>
+<li>Survival models — time-to-default prediction</li>
+<li>Bayesian methods — when data is scarce</li>
 </ul>
-<blockquote>
-<p>ML models are great benchmarks, but <strong>interpretability wins</strong> in regulated environments.</p>
-</blockquote>
+<p><strong>Feature selection with a credit twist:</strong></p>
+<ul>
+<li><strong>IV &amp; WoE</strong> (Information Value / Weight of Evidence) — the standard in credit scoring</li>
+<li>L1/L2 regularization, tree-based importance — you know these</li>
+<li>But again: if you can’t explain <em>why</em> → drop it</li>
+</ul>
 </section>
-<section id="feature-selection" class="slide level2">
-<h2>Feature Selection</h2>
-<p>Familiar techniques with a credit risk twist:</p>
-<ul>
-<li><strong>IV &amp; WoE</strong> — Information Value and Weight of Evidence (standard in credit scoring)</li>
-<li><strong>Correlation checks</strong> — Drop redundant features</li>
-<li><strong>Forward/Backward selection</strong> — Stepwise approaches</li>
-<li><strong>Regularization</strong> — L1/L2 to prune weak features</li>
-<li><strong>Tree-based importance</strong> — From RF or GBM</li>
-</ul>
-<p><strong>The twist:</strong> Even if a feature is statistically great, if you can’t explain <em>why</em> it predicts default, <strong>drop it</strong>.</p>
-</section>
-<section id="model-evaluation" class="slide level2">
-<h2>Model Evaluation</h2>
-<p>Four things validators care about:</p>
+<section id="model-evaluation-what-validators-care-about" class="slide level2">
+<h2>Model Evaluation — What Validators Care About</h2>
 <table class="caption-top">
 <colgroup>
 <col style="width: 36%">
@@ -422,83 +340,71 @@
 </tr>
 <tr class="even">
 <td><strong>Interpretability</strong></td>
-<td>Can we explain it?</td>
-<td>— (Qualitative)</td>
+<td>Can you explain it?</td>
+<td>Qualitative</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>In credit risk: <strong>a model that’s understood beats a model that’s slightly better but opaque.</strong></p>
-</blockquote>
-</section>
-<section id="model-testing" class="slide level2">
-<h2>Model Testing</h2>
-<p>Beyond your usual train/test split:</p>
+<p><strong>Beyond train/test split:</strong></p>
 <ul>
-<li><strong>Cross-validation</strong> — Stability across folds</li>
-<li><strong>Backtesting</strong> — Predictions vs.&nbsp;actuals over historical periods</li>
-<li><strong>Benchmarking</strong> — Compare to industry standards or simpler models</li>
-<li><strong>Sensitivity analysis</strong> — Tweak inputs, check if outputs make sense</li>
-<li><strong>Stress testing</strong> — Extreme scenarios (recession, rate spikes)</li>
-</ul>
-<p>The goal: prove your model works <strong>in good times AND bad times</strong>.</p>
-</section>
-<section id="adding-conservatism" class="slide level2">
-<h2>Adding Conservatism</h2>
-<p>Because we can’t predict the future perfectly, models often include safety buffers:</p>
-<ul>
-<li><strong>PD floors</strong> — Minimum probability of default (never assume zero risk)</li>
-<li><strong>Downturn weighting</strong> — Give more weight to recession-era data</li>
-<li><strong>Margins of Conservatism</strong> — Regulatory buffers added on top</li>
-<li><strong>Stress overlays</strong> — Adjust outputs based on worst-case scenarios</li>
+<li><strong>Backtesting</strong> — predictions vs.&nbsp;actuals over historical periods</li>
+<li><strong>Stress testing</strong> — extreme scenarios (recession, rate spikes)</li>
+<li><strong>Sensitivity analysis</strong> — tweak inputs, check if outputs stay reasonable</li>
 </ul>
 <blockquote>
-<p>Better to overestimate risk slightly than to underestimate it and lose billions.</p>
+<p><strong>A model that’s understood beats a model that’s slightly better but opaque.</strong></p>
 </blockquote>
 </section>
-<section id="documentation-not-optional" class="slide level2">
-<h2>Documentation: Not Optional</h2>
-<p>Every decision needs to be written down and justified:</p>
+<section id="expected-vs.-unexpected-losses" class="slide level2">
+<h2>Expected vs.&nbsp;Unexpected Losses</h2>
+<p><strong>Expected Losses (EL)</strong> — the “cost of doing business”</p>
 <ul>
-<li>What model did you build and why?</li>
-<li>What data did you use and why?</li>
-<li>What alternatives did you try and why were they rejected?</li>
-<li>What are the model’s limitations?</li>
+<li>Banks set aside <strong>provisions</strong> to cover these</li>
+<li>Your model needs to be <strong>accurate</strong></li>
 </ul>
-<p><strong>Why it matters:</strong></p>
+<p><strong>Unexpected Losses (UL)</strong> — what happens during crises</p>
 <ul>
-<li>Regulators and auditors will read it</li>
-<li>A validation team will challenge it</li>
-<li>Someone will need to maintain it after you leave</li>
+<li>Banks hold <strong>capital reserves</strong> for these</li>
+<li>Your model needs to be <strong>conservative</strong> (overestimate risk)</li>
+</ul>
+<p><strong>Conservatism mechanisms:</strong></p>
+<ul>
+<li><strong>PD floors</strong> → never assume zero risk</li>
+<li><strong>Downturn weighting</strong> → give more weight to recession data</li>
+<li><strong>Margins of conservatism</strong> → regulatory buffers on top of predictions</li>
+<li><strong>Stress overlays</strong> → worst-case scenario adjustments</li>
 </ul>
 </section>
-<section id="model-validation" class="slide level2">
-<h2>Model Validation</h2>
-<p>An <strong>independent team</strong> reviews your model. They ask:</p>
-<ul>
-<li><strong>Does it make sense?</strong> — Do relationships match credit intuition?</li>
-<li><strong>How could it fail?</strong> — What happens in a downturn?</li>
-<li><strong>Is it sustainable?</strong> — Can someone else maintain it in 3 years?</li>
-</ul>
-<p><strong>Outcomes:</strong></p>
+<section id="the-model-lifecycle" class="slide level2 scrollable">
+<h2>The Model Lifecycle</h2>
+<p>A credit risk project takes <strong>3 months to 1 year</strong>:</p>
+<ol type="1">
+<li><strong>Requirements</strong> — Business need + regulatory context</li>
+<li><strong>Data</strong> — Extract, clean, prepare (~70% of the time, as usual)</li>
+<li><strong>Modeling</strong> — Build, evaluate, compare</li>
+<li><strong>Documentation</strong> — Everything. Why this model, this data, these features, these alternatives.</li>
+<li><strong>Validation</strong> — An <strong>independent team</strong> challenges your model</li>
+<li><strong>Deployment &amp; Monitoring</strong> — Ship it, watch for drift</li>
+</ol>
+<p><strong>Validation outcomes:</strong></p>
 <ul>
 <li>✅ Approved</li>
-<li>⚠️ Conditionally Approved (fix issues, then use it)</li>
-<li>❌ Rejected (start over)</li>
+<li>⚠️ Conditionally approved (fix issues first)</li>
+<li>❌ Rejected (back to square one)</li>
 </ul>
 <blockquote>
-<p>Validation isn’t a test — it’s a challenge process. How you respond to findings matters.</p>
+<p>Validation isn’t a test — it’s a <strong>challenge process</strong>. How you respond to findings matters.</p>
 </blockquote>
 </section>
 <section id="key-takeaways" class="slide level2 scrollable">
 <h2>Key Takeaways</h2>
 <ol type="1">
-<li>Credit risk = predicting <strong>PD, LGD, EAD</strong> to estimate how much a bank could lose</li>
-<li><strong>Regulations</strong> shape everything — your model must be explainable and defensible</li>
-<li><strong>Logistic regression</strong> is king for PD; ML models are challengers</li>
+<li>Credit risk = predicting <strong>PD, LGD, EAD</strong> → Expected Loss</li>
+<li><strong>Regulations</strong> shape everything — explainability and defensibility are non-negotiable</li>
+<li><strong>Logistic regression</strong> is king; ML models serve as challengers</li>
 <li>Every feature needs a <strong>business reason</strong>, not just statistical significance</li>
 <li><strong>Documentation and validation</strong> are as important as the model itself</li>
-<li><strong>Conservatism</strong> is built in — it’s better to be safe than sorry</li>
+<li><strong>Conservatism</strong> is built in — better to overestimate risk than underestimate</li>
 </ol>
 <blockquote>
 <p>In credit risk, being right isn’t enough — you need to be <strong>understood, validated, and defensible</strong>.</p>
