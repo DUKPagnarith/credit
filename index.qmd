@@ -1,6 +1,6 @@
 ---
 title: "Credit Risk Modeling"
-subtitle: "By Duk Pagnarith"
+subtitle: "A Fast Introduction for Data Scientists — By Duk Pagnarith"
 author: ""
 format:
   revealjs:
@@ -16,163 +16,80 @@ format:
 
 ## What is Credit Risk?
 
-**The simple version:** Banks lend money. Sometimes people don't pay it back. That's credit risk.
+Banks lend money. Sometimes people don't pay it back. **That's credit risk.**
 
-- Banks make money from **interest and fees**
-- They lose money when borrowers **fail to repay**
 - Credit risk modeling = **predicting who won't pay back and how much the bank could lose**
+- It's classification + regression — but wrapped in **heavy regulations**
 
-> Think of it like a classification + regression problem — but with heavy rules and regulations on top.
+We predict **three things**:
 
----
-
-## The Three Things We Predict
-
-Credit risk breaks down into **three prediction tasks**:
-
-| Component | What We Predict | ML Analogy |
-|-----------|----------------|------------|
-| **PD** (Probability of Default) | Will this person stop paying? | Binary classification (0/1) |
-| **LGD** (Loss Given Default) | If they stop paying, how much do we lose? | Regression (0 to 1 ratio) |
-| **EAD** (Exposure at Default) | How much money is on the line? | Regression (dollar amount) |
+| Component | Prediction | You'd Call It... |
+|-----------|-----------|-----------------|
+| **PD** | Will they default? | Binary classification |
+| **LGD** | How much do we lose? | Regression (0–1) |
+| **EAD** | How much is at risk? | Regression ($) |
 
 **Expected Loss = PD × LGD × EAD**
 
 ---
 
-## How a Loan Goes Bad
+## How Defaults Work & Target Variables
 
-There's a timeline when someone stops paying:
+**The default timeline:**
 
-1. **Delinquency** — Missed a payment. Can still recover.
-2. **Default** — 90–180 days without payment. Officially "bad."
-3. **Loss** — Bank writes off the debt or takes the collateral.
+1. **Delinquency** → missed payments (can recover)
+2. **Default** → 90–180 days unpaid (officially "bad")
+3. **Loss** → debt written off or collateral seized
 
-This timeline is what **generates the labels** (target variables) for our models.
+**Building your labels:**
 
----
+- **PD target:** Snapshot each borrower → did they default within 12 months? Stack multiple years for economic diversity.
+- **LGD target:** (Balance − recovered + costs) ÷ balance at default. Requires years of recovery data.
+- **EAD target:** Outstanding balance + fees + accrued interest at default.
 
-## Different Products = Different Risk
-
-Not all loans are the same:
-
-| Product | Loan Size | Duration | Backed By |
-|---------|-----------|----------|-----------|
-| Mortgage | Big | Years | The house |
-| Credit Card | Small | Monthly | Nothing |
-
-**Why this matters:** You build **separate models** for different products because the risk drivers are completely different.
+> Different products (mortgage vs. credit card) and client types (retail vs. wholesale) need **separate models** — the risk drivers are completely different.
 
 ---
 
-## Retail vs. Wholesale Clients
+## What Makes Credit Risk Different from Regular ML
 
-- **Retail** = Regular people, small businesses
-- **Wholesale** = Big corporations, governments
+Things your DS instincts won't prepare you for:
 
-Banks build **different models** for each because:
+- **Regulations shape everything:** Basel Accords (capital), IFRS 9 (forward-looking losses), Stress Testing
+- **Explainability > accuracy:** Regulators can reject a model they can't understand
+- **Feature restrictions:** No social media, browsing history, or "creative" data. Every feature needs a **business reason**
+- **Conservatism is required:** PD floors, downturn weighting, margins of conservatism — models intentionally overestimate risk
+- **Documentation is mandatory:** Every decision must be written down and justified for auditors
 
-- Retail: lots of data, lots of defaults to learn from
-- Wholesale: less data, defaults are rare → harder to model
-
----
-
-## Expected vs. Unexpected Losses
-
-**Expected Losses (EL)**
-
-- Normal losses the bank plans for — like a "cost of doing business"
-- Banks set aside money (**provisions**) to cover these
-- Your model needs to be **accurate**
-
-**Unexpected Losses (UL)**
-
-- Extreme losses during crashes or recessions
-- Banks hold **capital reserves** for these
-- Your model needs to be **conservative** (better to overestimate risk)
+> You can't just build the best model — it also has to **follow the rules**.
 
 ---
 
-## Why Regulations Matter
+## Data & Feature Engineering
 
-Unlike most ML projects, credit risk models have **strict rules**:
+**What you CAN use:**
 
-- **Basel Accords** — How much money banks must hold as a safety net
-- **IFRS 9** — Banks must predict *future* losses, not just look at past ones
-- **Stress Testing** — "What if there's a recession?" Banks must show they can survive
+- Payment history, balances, transaction patterns
+- Credit bureau scores, income, debt ratios
+- Economic indicators (GDP, unemployment, interest rates)
 
-> You can't just build the best model — it also has to follow the rules.
+**Key features in credit risk:**
 
----
+| Category | Examples |
+|----------|---------|
+| **Payment behavior** | Missed payments, payment amounts |
+| **Delinquency** | Frequency, severity, recency |
+| **Financial health** | Income, debt-to-income ratio |
+| **Collateral** | Asset value securing the loan |
+| **Macro** | Unemployment rate, GDP growth |
 
-## The Model Lifecycle
-
-A credit risk project takes **3 months to 1 year** and follows these stages:
-
-1. **Requirements** — What does the business need?
-2. **Data Work** — Extract, clean, prepare (~70% of the time)
-3. **Modeling** — Build and evaluate models
-4. **Documentation** — Write everything down (seriously, everything)
-5. **Validation** — Independent team challenges your work
-6. **Deployment & Monitoring** — Ship it and watch it
-
----
-
-## Data: What You Can and Can't Use
-
-**You CAN use:**
-
-- Payment history, account balances, transaction data
-- Credit bureau scores
-- Income, debt levels
-- Economic indicators (GDP, unemployment)
-
-**You CANNOT use:**
-
-- Social media activity
-- Browsing history
-- Any "creative" data source
-
-> The model must be **explainable and fair**. You can't deny someone a loan because of a tweet.
-
----
-
-## Building the Target Variable
-
-**For PD (Classification):**
-
-- Look at each borrower today → did they default in the next 12 months?
-- Label: 0 = no default, 1 = default
-- Stack multiple years of snapshots to capture different economic periods
-
-**For LGD (Regression):**
-
-- (Balance at default − recovered money + costs) ÷ balance at default
-- Need to wait for recoveries to come in (can take years)
-
-**For EAD (Regression):**
-
-- Outstanding balance at default + fees + interest owed
-
----
-
-## Feature Engineering
-
-Common features in credit risk:
-
-- **Payment behavior** — missed payments, payment amounts
-- **Delinquency history** — how often, how severe
-- **Financial health** — income, debt-to-income ratio
-- **Collateral value** — what secures the loan
-- **Macro indicators** — unemployment rate, interest rates
-
-**Key rule:** Every feature must **make business sense**. No random transformations just because they boost AUC.
+> **The rule:** If a feature boosts AUC but you can't explain *why* it predicts default → **drop it**.
 
 ---
 
 ## Point-in-Time vs. Through-the-Cycle
 
-Two ways to think about risk:
+Two philosophies for measuring risk — picking the wrong one breaks trust:
 
 | | Point-in-Time (PIT) | Through-the-Cycle (TTC) |
 |--|---------------------|------------------------|
@@ -181,126 +98,102 @@ Two ways to think about risk:
 | **Used for** | Loan approvals, pricing | Regulatory capital |
 | **Analogy** | Today's weather | Average climate |
 
-Picking the wrong one = building a model your users don't trust.
+- **PIT** = sensitive, responsive, volatile
+- **TTC** = stable, conservative, slow to react
+- Many models blend both approaches depending on the use case
 
 ---
 
 ## Modeling Approaches
 
-**The go-to models:**
+**The workhorses (regulators love these):**
 
-- **Logistic Regression** — PD (binary). Transparent, regulators love it.
-- **Linear Regression** — LGD/EAD (continuous). Simple, explainable.
-- **Scorecards** — Binned features with point-based weights. Very common in retail.
+- **Logistic Regression** → PD. Transparent, standard, trusted.
+- **Scorecards** → Binned features + point weights. Dominant in retail lending.
+- **Linear Regression** → LGD/EAD. Simple and explainable.
 
-**Advanced options (often used as challengers):**
+**Challenger models (you'll be asked to build these too):**
 
-- Decision Trees, Random Forest, Gradient Boosting
-- Survival models (time-to-default)
-- Bayesian methods (when data is limited)
+- Gradient Boosting, Random Forest — great benchmarks
+- Survival models — time-to-default prediction
+- Bayesian methods — when data is scarce
 
-> ML models are great benchmarks, but **interpretability wins** in regulated environments.
+**Feature selection with a credit twist:**
 
----
-
-## Feature Selection
-
-Familiar techniques with a credit risk twist:
-
-- **IV & WoE** — Information Value and Weight of Evidence (standard in credit scoring)
-- **Correlation checks** — Drop redundant features
-- **Forward/Backward selection** — Stepwise approaches
-- **Regularization** — L1/L2 to prune weak features
-- **Tree-based importance** — From RF or GBM
-
-**The twist:** Even if a feature is statistically great, if you can't explain *why* it predicts default, **drop it**.
+- **IV & WoE** (Information Value / Weight of Evidence) — the standard in credit scoring
+- L1/L2 regularization, tree-based importance — you know these
+- But again: if you can't explain *why* → drop it
 
 ---
 
-## Model Evaluation
-
-Four things validators care about:
+## Model Evaluation — What Validators Care About
 
 | Dimension | Question | Metrics |
 |-----------|----------|---------|
 | **Discrimination** | Can it separate good vs. bad? | AUC, Gini |
 | **Calibration** | Are predicted probabilities accurate? | Brier Score, MSE |
 | **Stability** | Does it hold up over time? | PSI (Population Stability Index) |
-| **Interpretability** | Can we explain it? | — (Qualitative) |
+| **Interpretability** | Can you explain it? | Qualitative |
 
-> In credit risk: **a model that's understood beats a model that's slightly better but opaque.**
+**Beyond train/test split:**
 
----
+- **Backtesting** — predictions vs. actuals over historical periods
+- **Stress testing** — extreme scenarios (recession, rate spikes)
+- **Sensitivity analysis** — tweak inputs, check if outputs stay reasonable
 
-## Model Testing
-
-Beyond your usual train/test split:
-
-- **Cross-validation** — Stability across folds
-- **Backtesting** — Predictions vs. actuals over historical periods
-- **Benchmarking** — Compare to industry standards or simpler models
-- **Sensitivity analysis** — Tweak inputs, check if outputs make sense
-- **Stress testing** — Extreme scenarios (recession, rate spikes)
-
-The goal: prove your model works **in good times AND bad times**.
+> **A model that's understood beats a model that's slightly better but opaque.**
 
 ---
 
-## Adding Conservatism
+## Expected vs. Unexpected Losses
 
-Because we can't predict the future perfectly, models often include safety buffers:
+**Expected Losses (EL)** — the "cost of doing business"
 
-- **PD floors** — Minimum probability of default (never assume zero risk)
-- **Downturn weighting** — Give more weight to recession-era data
-- **Margins of Conservatism** — Regulatory buffers added on top
-- **Stress overlays** — Adjust outputs based on worst-case scenarios
+- Banks set aside **provisions** to cover these
+- Your model needs to be **accurate**
 
-> Better to overestimate risk slightly than to underestimate it and lose billions.
+**Unexpected Losses (UL)** — what happens during crises
 
----
+- Banks hold **capital reserves** for these
+- Your model needs to be **conservative** (overestimate risk)
 
-## Documentation: Not Optional
+**Conservatism mechanisms:**
 
-Every decision needs to be written down and justified:
-
-- What model did you build and why?
-- What data did you use and why?
-- What alternatives did you try and why were they rejected?
-- What are the model's limitations?
-
-**Why it matters:**
-
-- Regulators and auditors will read it
-- A validation team will challenge it
-- Someone will need to maintain it after you leave
+- **PD floors** → never assume zero risk
+- **Downturn weighting** → give more weight to recession data
+- **Margins of conservatism** → regulatory buffers on top of predictions
+- **Stress overlays** → worst-case scenario adjustments
 
 ---
 
-## Model Validation
+## The Model Lifecycle
 
-An **independent team** reviews your model. They ask:
+A credit risk project takes **3 months to 1 year**:
 
-- **Does it make sense?** — Do relationships match credit intuition?
-- **How could it fail?** — What happens in a downturn?
-- **Is it sustainable?** — Can someone else maintain it in 3 years?
+1. **Requirements** — Business need + regulatory context
+2. **Data** — Extract, clean, prepare (~70% of the time, as usual)
+3. **Modeling** — Build, evaluate, compare
+4. **Documentation** — Everything. Why this model, this data, these features, these alternatives.
+5. **Validation** — An **independent team** challenges your model
+6. **Deployment & Monitoring** — Ship it, watch for drift
 
-**Outcomes:**
+**Validation outcomes:**
 
 - ✅ Approved
-- ⚠️ Conditionally Approved (fix issues, then use it)
-- ❌ Rejected (start over)
+- ⚠️ Conditionally approved (fix issues first)
+- ❌ Rejected (back to square one)
 
-> Validation isn't a test — it's a challenge process. How you respond to findings matters.
+> Validation isn't a test — it's a **challenge process**. How you respond to findings matters.
 
 ---
 
 ## Key Takeaways
 
-1. Credit risk = predicting **PD, LGD, EAD** to estimate how much a bank could lose
-2. **Regulations** shape everything — your model must be explainable and defensible
-3. **Logistic regression** is king for PD; ML models are challengers
+1. Credit risk = predicting **PD, LGD, EAD** → Expected Loss
+2. **Regulations** shape everything — explainability and defensibility are non-negotiable
+3. **Logistic regression** is king; ML models serve as challengers
 4. Every feature needs a **business reason**, not just statistical significance
 5. **Documentation and validation** are as important as the model itself
-6. **Conservatism** is built in — it's better to be safe than sorry
+6. **Conservatism** is built in — better to overestimate risk than underestimate
 
 > In credit risk, being right isn't enough — you need to be **understood, validated, and defensible**.
